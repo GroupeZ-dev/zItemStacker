@@ -39,8 +39,10 @@ public class ItemStackerPlugin extends ZPlugin {
 
         new Metrics(this, 9330);
 
-        VersionChecker checker = new VersionChecker(this, 15);
-        checker.checkVersion();
+        if (getConfig().getBoolean("enable-version-check", true)) {
+            VersionChecker checker = new VersionChecker(this, 15);
+            checker.checkVersion();
+        }
 
         this.addListener(this.itemManager);
         this.translationManager.loadTranslations();

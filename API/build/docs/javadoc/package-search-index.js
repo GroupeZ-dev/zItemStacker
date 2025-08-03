@@ -1,1 +1,0 @@
-packageSearchIndex = [{"l":"All Packages","u":"allpackages-index.html"},{"l":"fr.maxlego08.itemstacker.api"}];updateSearchResults();

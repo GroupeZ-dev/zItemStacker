@@ -184,8 +184,15 @@ public class ZTranslationManager implements TranslationManager {
 
         if (itemStack == null) return "ItemStack is NULL";
 
-        if (itemStack.hasItemMeta() && itemStack.getItemMeta().hasDisplayName()) {
-            return itemStack.getItemMeta().getDisplayName();
+        if (itemStack.hasItemMeta()) {
+            var meta = itemStack.getItemMeta();
+            if (meta != null) {
+                if (meta.hasDisplayName()) {
+                    return meta.getDisplayName();
+                } else if (meta.hasItemName()) {
+                    return meta.getItemName();
+                }
+            }
         }
 
         Material material = itemStack.getType();
