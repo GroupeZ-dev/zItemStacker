@@ -53,6 +53,14 @@ public enum NmsVersion {
 
     ;
 
+    /**
+     * La version la plus recente connue de cette enumeration. Declaree avant
+     * {@link #nmsVersion} pour etre deja initialisee quand
+     * {@link #getCurrentVersion()} s'execute. Ajouter une constante en fin de
+     * liste suffit a la mettre a jour, il n'y a rien d'autre a maintenir.
+     */
+    private static final NmsVersion HIGHEST = values()[values().length - 1];
+
     public static final NmsVersion nmsVersion = getCurrentVersion();
     private final int version;
 
@@ -62,15 +70,33 @@ public enum NmsVersion {
 
     /**
      * Gets the current version of the Bukkit server.
+     * <p>
+     * La version est lue au debut de {@link Bukkit#getBukkitVersion()}
+     * ("1.21.3-R0.1-SNAPSHOT", "26.2-R0.1-SNAPSHOT", ...). Tout ce que cette
+     * enumeration ne connait pas -- une version majeure qui n'est plus "1.", une
+     * version plus recente que {@link #HIGHEST}, ou une chaine illisible --
+     * resout vers {@link #HIGHEST}. Il ne faut jamais retomber sur une version
+     * legacy : ces chemins appellent Material#getId(), qui leve une exception sur
+     * un serveur moderne et empeche le plugin de demarrer.
      *
      * @return The NmsVersion instance corresponding to the current version.
      */
     public static NmsVersion getCurrentVersion() {
-        Matcher matcher = Pattern.compile("(?<version>\\d+\\.\\d+)(?<patch>\\.\\d+)?").matcher(Bukkit.getBukkitVersion());
-        int currentVersion = matcher.find() ? Integer.parseInt(matcher.group("version").replace(".", "") + (matcher.group("patch") != null ? matcher.group("patch").replace(".", "") : "0")) : 0;
+        Matcher matcher = Pattern.compile("^(?<major>\\d+)(?:\\.(?<minor>\\d+))?(?:\\.(?<patch>\\d+))?").matcher(Bukkit.getBukkitVersion());
+
+        // Version illisible, ou Minecraft 26.1 et plus recent qui abandonnent le
+        // prefixe "1." : dans les deux cas le serveur est au moins aussi recent
+        // que la derniere version connue
+        if (!matcher.find() || !matcher.group("major").equals("1") || matcher.group("minor") == null) return HIGHEST;
+
+        String patch = matcher.group("patch");
+        int currentVersion = Integer.parseInt("1" + matcher.group("minor") + (patch == null ? "0" : patch));
+
+        // Plus recent que toutes les versions connues (1.21.4 et au-dela)
+        if (currentVersion >= HIGHEST.version) return HIGHEST;
 
         // Returns the version closest to the current version
-        return java.util.Arrays.stream(values()).min(java.util.Comparator.comparingInt(v -> Math.abs(v.version - currentVersion))).orElse(V_1_12_2);
+        return java.util.Arrays.stream(values()).min(java.util.Comparator.comparingInt(v -> Math.abs(v.version - currentVersion))).orElse(HIGHEST);
     }
 
     /**
