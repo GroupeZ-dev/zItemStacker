@@ -30,6 +30,10 @@ allprojects {
         maven(url = "https://hub.spigotmc.org/nexus/content/repositories/snapshots/")
         maven(url = "https://repo.extendedclip.com/content/repositories/placeholderapi/")
         maven(url = "https://libraries.minecraft.net/")
+        maven {
+            name = "faststatsReleases"
+            url = uri("https://repo.faststats.dev/releases")
+        }
     }
 
     java {
@@ -71,6 +75,7 @@ allprojects {
 
     tasks.compileJava {
         options.encoding = "UTF-8"
+        options.release = 21
     }
 
     tasks.javadoc {
@@ -92,11 +97,20 @@ repositories {
 
 dependencies {
     api(projects.api)
+    implementation("dev.faststats.metrics:bukkit:0.30.1")
     // api(projects.hooks)
 }
 
 tasks {
     shadowJar {
+
+        relocate("dev.faststats", "fr.maxlego08.itemstacker.libs.faststats")
+
+        // Les 3 artefacts FastStats (bukkit, core, config) embarquent chacun leur propre
+        // META-INF/faststats.properties : on ne garde que la premiere entree.
+        filesMatching("META-INF/faststats.properties") {
+            duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+        }
 
         rootProject.extra.properties["sha"]?.let { sha ->
             archiveClassifier.set("${rootProject.extra.properties["classifier"]}-${sha}")
@@ -108,10 +122,6 @@ tasks {
 
     build {
         dependsOn(shadowJar)
-    }
-
-    compileJava {
-        options.release = 21
     }
 
     processResources {
