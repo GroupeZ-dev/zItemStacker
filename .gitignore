@@ -44,7 +44,6 @@ bin/
 ### Mac OS ###
 .DS_Store
 src/main/java/fr/maxlego08/items/enchantments/ZEnchantments.java~
-target-api/zItems-API-1.0.0.0.jar
 .gradle
 build
-target-api/zItemStacker-API-2.0.1.jar
+target-api/

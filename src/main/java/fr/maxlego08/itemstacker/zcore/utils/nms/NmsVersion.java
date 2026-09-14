@@ -194,6 +194,19 @@ public enum NmsVersion {
         return version >= 1205;
     }
 
+    /**
+     * Checks if the current version exposes the item name component on ItemMeta.
+     * <p>
+     * ItemMeta#hasItemName() et ItemMeta#getItemName() n'existent qu'a partir de
+     * 1.20.5. Les appeler sur un serveur plus ancien leve un NoSuchMethodError,
+     * alors que plugin.yml annonce api-version 1.20.
+     *
+     * @return True if the item name component is supported, else False.
+     */
+    public boolean hasItemNameApi() {
+        return version >= V_1_20_5.version;
+    }
+
     public boolean isOneHand() {
         return version == 188;
     }
