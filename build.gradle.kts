@@ -7,7 +7,7 @@ plugins {
 }
 
 group = "fr.maxlego08.itemstacker"
-version = "2.0.1"
+version = "2.1.0"
 
 extra.set("targetFolder", file("target/"))
 extra.set("apiFolder", file("target-api/"))
