@@ -28,3 +28,6 @@ language: en-us
 # List of world names to disable.
 disable-worlds:
   - "world_the_end"
+
+# Allows checking if the plugin version is up to date.
+enable-version-check: true

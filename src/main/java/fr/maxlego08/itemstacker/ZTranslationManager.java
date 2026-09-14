@@ -4,6 +4,7 @@ import com.google.gson.Gson;
 import com.google.gson.annotations.SerializedName;
 import fr.maxlego08.itemstacker.api.TranslationManager;
 import fr.maxlego08.itemstacker.save.Config;
+import fr.maxlego08.itemstacker.zcore.utils.nms.NmsVersion;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
@@ -184,8 +185,15 @@ public class ZTranslationManager implements TranslationManager {
 
         if (itemStack == null) return "ItemStack is NULL";
 
-        if (itemStack.hasItemMeta() && itemStack.getItemMeta().hasDisplayName()) {
-            return itemStack.getItemMeta().getDisplayName();
+        if (itemStack.hasItemMeta()) {
+            var meta = itemStack.getItemMeta();
+            if (meta != null) {
+                if (meta.hasDisplayName()) {
+                    return meta.getDisplayName();
+                } else if (NmsVersion.nmsVersion.hasItemNameApi() && meta.hasItemName()) {
+                    return meta.getItemName();
+                }
+            }
         }
 
         Material material = itemStack.getType();

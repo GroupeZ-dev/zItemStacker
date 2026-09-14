@@ -1,5 +1,6 @@
 package fr.maxlego08.itemstacker;
 
+import dev.faststats.bukkit.BukkitContext;
 import fr.maxlego08.itemstacker.api.ItemManager;
 import fr.maxlego08.itemstacker.api.TranslationManager;
 import fr.maxlego08.itemstacker.command.commands.CommandItem;
@@ -20,6 +21,9 @@ public class ItemStackerPlugin extends ZPlugin {
 
     private final ItemManager itemManager = new ZItemManager(this);
     private final TranslationManager translationManager = new ZTranslationManager(this);
+    private final BukkitContext context = new BukkitContext.Factory(this, "b84c0149508618887a6f44800972481d")
+            .metrics(dev.faststats.Metrics.Factory::create)
+            .create();
 
     @Override
     public void onEnable() {
@@ -38,9 +42,12 @@ public class ItemStackerPlugin extends ZPlugin {
         this.loadFiles();
 
         new Metrics(this, 9330);
+        this.context.ready();
 
-        VersionChecker checker = new VersionChecker(this, 15);
-        checker.checkVersion();
+        if (getConfig().getBoolean("enable-version-check", true)) {
+            VersionChecker checker = new VersionChecker(this, 15);
+            checker.checkVersion();
+        }
 
         this.addListener(this.itemManager);
         this.translationManager.loadTranslations();
@@ -54,6 +61,8 @@ public class ItemStackerPlugin extends ZPlugin {
         this.preDisable();
 
         this.saveFiles();
+
+        this.context.shutdown();
 
         this.postDisable();
     }

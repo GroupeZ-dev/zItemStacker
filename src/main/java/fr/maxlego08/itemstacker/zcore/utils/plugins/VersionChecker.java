@@ -1,14 +1,13 @@
 package fr.maxlego08.itemstacker.zcore.utils.plugins;
 
-import fr.maxlego08.itemstacker.zcore.enums.Message;
 import fr.maxlego08.itemstacker.zcore.logger.Logger;
+import fr.maxlego08.itemstacker.zcore.utils.ZUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.plugin.Plugin;
-import org.bukkit.scheduler.BukkitRunnable;
 
 import java.io.IOException;
 import java.net.URI;
@@ -23,7 +22,7 @@ import java.util.function.Consumer;
  *
  * @author Maxlego08
  */
-public class VersionChecker implements Listener {
+public class VersionChecker extends ZUtils implements Listener {
 
     private final String URL_API = "https://groupez.dev/api/v1/resource/version/%s";
     private final String URL_RESOURCE = "https://groupez.dev/resources/%s";
@@ -72,14 +71,10 @@ public class VersionChecker implements Listener {
     public void onConnect(PlayerJoinEvent event) {
         final Player player = event.getPlayer();
         if (!isLastVersion && event.getPlayer().hasPermission("zplugin.notifs")) {
-            new BukkitRunnable() {
-                @Override
-                public void run() {
-                    String prefix = Message.PREFIX.getMessage();
-                    player.sendMessage(prefix + "§cYou do not use the latest version of the plugin! Thank you for taking the latest version to avoid any risk of problem!");
-                    player.sendMessage(prefix + "§fDownload plugin here: §a" + String.format(URL_RESOURCE, pluginID));
-                }
-            }.runTaskLater(plugin, 20 * 2);
+            this.plugin.getServer().getScheduler().runTaskLater(this.plugin, () -> {
+                message(player, "§cYou do not use the latest version of the plugin! Thank you for taking the latest version to avoid any risk of problem!");
+                message(player, "§fDownload plugin here: §a" + String.format(URL_RESOURCE, pluginID));
+            }, 20 * 2);
         }
     }
 

@@ -7,7 +7,7 @@ plugins {
 }
 
 group = "fr.maxlego08.itemstacker"
-version = "2.0.1"
+version = "2.1.0"
 
 extra.set("targetFolder", file("target/"))
 extra.set("apiFolder", file("target-api/"))
@@ -30,6 +30,10 @@ allprojects {
         maven(url = "https://hub.spigotmc.org/nexus/content/repositories/snapshots/")
         maven(url = "https://repo.extendedclip.com/content/repositories/placeholderapi/")
         maven(url = "https://libraries.minecraft.net/")
+        maven {
+            name = "faststatsReleases"
+            url = uri("https://repo.faststats.dev/releases")
+        }
     }
 
     java {
@@ -71,6 +75,7 @@ allprojects {
 
     tasks.compileJava {
         options.encoding = "UTF-8"
+        options.release = 21
     }
 
     tasks.javadoc {
@@ -80,7 +85,7 @@ allprojects {
     }
 
     dependencies {
-        compileOnly("org.spigotmc:spigot-api:1.21.5-R0.1-SNAPSHOT")
+        compileOnly("org.spigotmc:spigot-api:26.2-R0.1-SNAPSHOT")
         compileOnly("com.mojang:authlib:1.5.26")
         compileOnly("me.clip:placeholderapi:2.11.6")
     }
@@ -92,11 +97,20 @@ repositories {
 
 dependencies {
     api(projects.api)
+    implementation("dev.faststats.metrics:bukkit:0.30.1")
     // api(projects.hooks)
 }
 
 tasks {
     shadowJar {
+
+        relocate("dev.faststats", "fr.maxlego08.itemstacker.libs.faststats")
+
+        // Les 3 artefacts FastStats (bukkit, core, config) embarquent chacun leur propre
+        // META-INF/faststats.properties : on ne garde que la premiere entree.
+        filesMatching("META-INF/faststats.properties") {
+            duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+        }
 
         rootProject.extra.properties["sha"]?.let { sha ->
             archiveClassifier.set("${rootProject.extra.properties["classifier"]}-${sha}")
@@ -110,14 +124,13 @@ tasks {
         dependsOn(shadowJar)
     }
 
-    compileJava {
-        options.release = 21
-    }
-
     processResources {
+        // La version est capturee a la configuration : y acceder a l'execution via
+        // project.version est deprecie et deviendra une erreur avec Gradle 10.
+        val pluginVersion = project.version.toString()
         from("resources")
         filesMatching("plugin.yml") {
-            expand("version" to project.version)
+            expand("version" to pluginVersion)
         }
     }
 }
