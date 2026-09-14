@@ -125,9 +125,12 @@ tasks {
     }
 
     processResources {
+        // La version est capturee a la configuration : y acceder a l'execution via
+        // project.version est deprecie et deviendra une erreur avec Gradle 10.
+        val pluginVersion = project.version.toString()
         from("resources")
         filesMatching("plugin.yml") {
-            expand("version" to project.version)
+            expand("version" to pluginVersion)
         }
     }
 }
